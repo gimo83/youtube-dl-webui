@@ -63,11 +63,15 @@ def apiServiceVideo(id=None):
                 doc_return = {'count':doc_count,'result':db_return}
             else:
                 db_return = db_video.get(id)
+                db_return['_id']=db_return.eid
                 doc_return = {'result':[db_return]}
         elif request.method == 'POST':
             doc = request.get_json(force=True)
             db_video.add_video(doc)
             doc_return = {'result':{'status':'ok'},}
+        elif request.method == 'DELETE':
+            db_video.remove(id)
+            doc_return = {'result':{'status':'ok','_id':id},}
         
         return jsonify(doc_return)
     elif request.is_xhr:
@@ -76,6 +80,20 @@ def apiServiceVideo(id=None):
         return redirect(url_for('login'))
 
 
+@app.route('/api/service/download/<int:id>', methods=['GET'])
+def apiServiceDownload(id=None):
+    return_value = "{'status':'error','message':'login is required'}";
+    if 'username' in session and request.is_xhr:
+        doc = db_video.get(id)
+        newThread = threading.Thread(target=download_video, args=(doc,))
+        threadList.append(newThread)
+        newThread.start()
+        doc_return = {'status':'ok','message':'video will be downloaded','result':''}
+        return_value = jsonify(doc_return)
+    elif not(request.is_xhr):
+        return_value = redirect(url_for('login'))
+
+    return return_value
 
 
 def download_video_info(video):
@@ -87,3 +105,17 @@ def download_video_info(video):
             db_queue.remove(video.eid)
         except:
             print 'error in getting video info'
+
+def download_progress(dl_status):
+    db_video.update_dl_status(dl_status)
+    if dl_status['status'] == 'downloading':
+        pass
+    elif dl_status['status'] == 'finished':
+        pass
+        #print 'video is finish'
+
+def download_video(video):
+    ydl_opts = {'progress_hooks':[download_progress]}
+    if video != None:
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.process_info(video)
