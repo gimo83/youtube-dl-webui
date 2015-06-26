@@ -1,4 +1,9 @@
 {% extends 'base.html' %}
-{% block page_contents %}
-      <h1>Hello, {{ user.nickname }}!</h1>
+{% block page_content %}
+{% endblock %}
+
+
+{% block scripts %}
+  {{super()}}
+  <script type=text/javascript src="{{url_for('static', filename='video.js') }}"></script>
 {% endblock %}

@@ -30,6 +30,15 @@ class videoDAO:
 
         return doc
 
+    def count(self):
+        count = 0;
+        try:
+            count = len(self.video)
+        except:
+            print "error in counting video documents"
+        
+        return count
+
     def get_all(self):
         urls = []
         try:
