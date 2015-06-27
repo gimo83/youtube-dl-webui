@@ -61,6 +61,7 @@ def apiServiceVideo(id=None):
                 doc_count = db_video.count()
                 for doc in db_return: doc['_id']=doc.eid;
                 doc_return = {'count':doc_count,'result':db_return}
+                #print doc_return
             else:
                 db_return = db_video.get(id)
                 db_return['_id']=db_return.eid

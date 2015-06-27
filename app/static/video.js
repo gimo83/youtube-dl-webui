@@ -41,9 +41,36 @@ function addVideo(video){
 }
 
 
+function convertByte(numByte){
+    console.log(numByte)
+    var str_result = "";
+    var numUnit = numByte;
+    var count = 0;
+    var unit = {0:'B',1:'KB',2:'MB',3:'GB',4:'TB'};
+    while(numUnit > 1024){
+	count++;
+	numUnit = numUnit / 1024;
+    }
+
+    
+    return numUnit.toFixed(2)+" "+unit[count];
+}
+
+function downloadStatusString(dl_status){
+    var return_value = "100%";
+    if( dl_status.status == 'downloading'){
+	var innerText = dl_status._percent_str;
+	return_value =  convertByte(dl_status.downloaded_bytes)+" of "+dl_status._total_bytes_str+" at "+ dl_status._speed_str +" ( "+innerText+" )";
+    }
+    else{
+	return_value = dl_status._total_bytes_str +" of "+ dl_status._total_bytes_str + " ( "+return_value+" )";
+    }
+    return return_value;
+}
+
 function updateVideo(video){
     if('dl_status' in video){
-	console.log(video.dl_status);
+	//console.log(video.dl_status);
 	var tag_id_class = "#"+video._id+" .progress-bar";
 	var progBar = $(tag_id_class);
 	var barStatus = "progress-bar progress-bar-success progress-bar-striped ";
@@ -54,7 +81,7 @@ function updateVideo(video){
         var barValue  = (video.dl_status.status == 'downloading')?video.dl_status.downloaded_bytes : 100;
         var barMaxVal = (video.dl_status.status == 'finshed')?video.dl_status.total_bytes:100;
         var barWidth  = (video.dl_status.status == 'downloading')?video.dl_status._percent_str:'100%';
-        var innerText = (video.dl_status.status == 'downloading')?video.dl_status._percent_str:'100%';
+        var innerText = downloadStatusString(video.dl_status);
 	
 	//make progress bar acttive
 	progBar.attr('class',barStatus);
@@ -108,7 +135,7 @@ function processVideoList(videoList){
       }
   }
 
-  updateDataTimer = setTimeout(loadVideolist,2000);
+  updateDataTimer = setTimeout(loadVideolist,5000);
 }
 
 function loadVideolist(){
